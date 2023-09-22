@@ -20,23 +20,27 @@ def browser_setup():
 
     options.add_argument("window-size=2800,1400")
 
-    selenoid_capabilities = {
-        "browserName": "chrome",
-        "browserVersion": "100",
-        "selenoid:options": {"enableVNC": True, "enableVideo": True},
-    }
-    options.capabilities.update(selenoid_capabilities)
+    environment = os.getenv("ENVIRONMENT")
 
-    login = os.getenv("LOGIN")
-    password = os.getenv("PASSWORD")
-    browser_url = os.getenv("BROWSER_URL")
+    if environment == 'selenoid':
+        selenoid_capabilities = {
+            "browserName": "chrome",
+            "browserVersion": "100",
+            "selenoid:options": {"enableVNC": True, "enableVideo": True},
+        }
+        options.capabilities.update(selenoid_capabilities)
 
-    driver = webdriver.Remote(
-        command_executor=f"https://{login}:{password}@{browser_url}",
-        options=options,
-    )
+        login = os.getenv("LOGIN")
+        password = os.getenv("PASSWORD")
+        browser_url = os.getenv("BROWSER_URL")
 
-    browser.config.driver = driver
+        driver = webdriver.Remote(
+            command_executor=f"https://{login}:{password}@{browser_url}",
+            options=options,
+        )
+
+        browser.config.driver = driver
+
     browser.config.driver_options = options
     browser.config.base_url = "https://innowise-group.com/"
 
