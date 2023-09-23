@@ -1,38 +1,33 @@
-import os
-
 import pytest
-from dotenv import load_dotenv
 from selene import browser
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
+from config import config
 from utils import attach
-
-
-@pytest.fixture(scope="session", autouse=True)
-def load_env():
-    load_dotenv()
 
 
 @pytest.fixture(scope='function', autouse=True)
 def browser_setup():
-    options = Options()
+    if config.browser_name == 'chrome':
+        options = webdriver.ChromeOptions()
+        browser_version = '100'
+    else:
+        options = webdriver.FirefoxOptions()
+        browser_version = '98'
 
-    options.add_argument("window-size=2800,1400")
+    options.add_argument(f"window-size={config.window_width},{config.window_height}")
 
-    environment = os.getenv("ENVIRONMENT")
-
-    if environment == 'selenoid':
+    if config.context == 'remote':
         selenoid_capabilities = {
-            "browserName": "chrome",
-            "browserVersion": "100",
+            "browserName": config.browser_name,
+            "browserVersion": browser_version,
             "selenoid:options": {"enableVNC": True, "enableVideo": True},
         }
         options.capabilities.update(selenoid_capabilities)
 
-        login = os.getenv("LOGIN")
-        password = os.getenv("PASSWORD")
-        browser_url = os.getenv("BROWSER_URL")
+        login = config.login
+        password = config.password
+        browser_url = config.browser_url
 
         driver = webdriver.Remote(
             command_executor=f"https://{login}:{password}@{browser_url}",
@@ -42,13 +37,16 @@ def browser_setup():
         browser.config.driver = driver
 
     browser.config.driver_options = options
-    browser.config.base_url = "https://innowise-group.com/"
+    browser.config.base_url = config.base_url
 
     yield browser
 
     attach.add_html(browser)
     attach.add_screenshot(browser)
-    attach.add_logs(browser)
+
+    if config.browser_name == 'chrome':
+        attach.add_logs(browser)
+
     attach.add_video(browser)
 
     browser.quit()
