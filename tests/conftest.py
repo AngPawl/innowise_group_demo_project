@@ -15,7 +15,7 @@ def browser_setup():
         options = webdriver.FirefoxOptions()
         browser_version = '98'
 
-    options.add_argument(f"window-size={config.window_width},{config.window_height}")
+    options.add_argument(f'-{config.headless}')
 
     if config.context == 'remote':
         selenoid_capabilities = {
@@ -36,6 +36,9 @@ def browser_setup():
 
         browser.config.driver = driver
 
+    browser.config.driver.set_window_rect(
+        width=config.window_width, height=config.window_height
+    )
     browser.config.driver_options = options
     browser.config.base_url = config.base_url
 
