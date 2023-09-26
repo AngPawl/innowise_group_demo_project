@@ -36,9 +36,8 @@ def browser_setup():
 
         browser.config.driver = driver
 
-    browser.config.driver.set_window_rect(
-        width=config.window_width, height=config.window_height
-    )
+    browser.config.window_width = config.window_width
+    browser.config.window_height = config.window_height
     browser.config.driver_options = options
     browser.config.base_url = config.base_url
 
